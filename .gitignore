@@ -4,6 +4,8 @@
 
 ## User settings
 xcuserdata/
+*.xcuserdatad
+*.xcuserstate
 
 ## Obj-C/Swift specific
 *.hmap
@@ -30,6 +32,8 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+.swiftpm/
+Package.resolved
 
 # CocoaPods
 #
@@ -41,6 +45,10 @@ playground.xcworkspace
 #
 # Add this line if you want to avoid checking in source code from the Xcode workspace
 # *.xcworkspace
+
+# CocoaPods (важно!)
+Pods/
+Podfile.lock
 
 # Carthage
 #
@@ -60,3 +68,12 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Xcode
+.DS_Store
+*.xcworkspace
+DerivedData/
+build/
+
+# Logs
+*.log

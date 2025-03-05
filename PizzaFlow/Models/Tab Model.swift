@@ -11,4 +11,5 @@ enum Tab {
     case home
     case map
     case cart
+    case profile
 }

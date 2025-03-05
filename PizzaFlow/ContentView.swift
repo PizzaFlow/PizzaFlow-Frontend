@@ -11,7 +11,7 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        VStack(spacing: 0) { // Добавляем `spacing: 0`, чтобы не было зазора
+        VStack(spacing: 0) {
             ZStack {
                 switch selectedTab {
                 case .favourites:
@@ -22,15 +22,17 @@ struct ContentView: View {
                     MapScreen(selectedTab: $selectedTab)
                 case .cart:
                     CartMenuView(selectedTab: $selectedTab)
+                case .profile:
+                    ProfileMenuView(selectedTab: $selectedTab)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Расширяем контент на весь экран
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
                    
-            CustomBar(selectedTab: $selectedTab) // Теперь `CustomBar` всегда внизу
-                .frame(height: 70) // Фиксируем высоту панели
-                .background(Color("Dark")) // Цвет фона панели
+            CustomBar(selectedTab: $selectedTab)
+                .frame(height: 70)
+                .background(Color("Dark"))
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom) // Убираем проблемы с клавиатурой
+        .ignoresSafeArea(.keyboard, edges: .bottom) 
     }
 }
 

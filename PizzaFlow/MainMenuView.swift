@@ -26,16 +26,14 @@ struct MainMenuView: View {
                             Text("Волокамское шоссе, 4")
                                 .foregroundColor(.white)
                                 .font(.system(size: 18, weight: .medium))
+                            Button(action:{
+                                //
+                            }){
+                                Image(systemName: "chevron.down")
+                                    .foregroundColor(Color("Orange"))
+                            }
                         }
                         Spacer()
-                        Button(action:{
-                            //
-                        }){
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(.white)
-                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
@@ -136,10 +134,12 @@ struct CustomBar: View {
             Spacer()
             TabBarButton(image: "cart", tab: .cart, selectedTab: $selectedTab)
             Spacer()
+            TabBarButton(image: "person.crop.circle", tab: .profile, selectedTab: $selectedTab)
+                .padding(.trailing, 10)
         }
         .frame(height: 70)
         .background(Color("Dark"))
-       // .ignoresSafeArea(.all, edges: .bottom)
+        .offset(x: -10)
     }
 }
 struct TabBarButton: View {
@@ -161,5 +161,5 @@ struct TabBarButton: View {
 }
 
 #Preview {
-    MainMenuView(selectedTab: .constant(.favourites))
+    MainMenuView(selectedTab: .constant(.home))
 }

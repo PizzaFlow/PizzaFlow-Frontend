@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainMenuView: View {
     @Binding var selectedTab: Tab
+    @StateObject var apiClient = ApiClient()
     let calumns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -41,8 +42,8 @@ struct MainMenuView: View {
                     
                     ScrollView {
                         LazyVGrid(columns: calumns, spacing: 20) {
-                            ForEach(0..<4, id: \.self) { _ in
-                                PizzaCardView()
+                            ForEach(apiClient.pizzas) {pizza in
+                                PizzaCardView(pizza: pizza)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -54,24 +55,31 @@ struct MainMenuView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear{
+            apiClient.fetchPizzas()
+        }
     }
 }
 struct PizzaCardView: View {
+    let pizza: Pizza
     @State private var isFavorite: Bool = false
     var body: some View {
         VStack(spacing: 0) {
-            Image("pizza")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 130)
-                .padding(8)
+            AsyncImage(url: URL(string: pizza.photo)) {image in
+                image.resizable()
+            } placeholder: {
+                ProgressView()
+            }
+            .scaledToFit()
+            .frame(height: 130)
+            .padding(8)
             VStack(alignment: .leading, spacing: 4) {
-                Text("650 ₽")
+                Text("\(pizza.price, specifier: "%.2f") ₽")
                     .foregroundColor(Color("Orange"))
                     .font(.system(size: 18, weight: .bold))
                     .padding(.leading)
                 Spacer()
-                Text("Пепперони")
+                Text(pizza.name)
                     .foregroundColor(Color("Dark"))
                     .font(.system(size: 17, weight: .bold))
                     .padding(.leading)

@@ -10,7 +10,9 @@ import SwiftUI
 struct LoginView: View {
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var isPasswordVisible : Bool = false
+    @State private var errorMessage: String?
+    @EnvironmentObject var apiClient: ApiClient
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
         NavigationStack {
             ZStack {
@@ -19,21 +21,18 @@ struct LoginView: View {
                 ScrollView {
                     VStack{
                         Spacer(minLength: 60)
-                        Text("Добро Пожаловать в")
+                        Text("Вход")
                             .font(.system(size: 28, weight: .light, design: .default))
                             .foregroundColor(Color("White"))
-                        HStack {
-                            Text("Pizza")
-                                .font(.system(size: 50, weight: .light, design: .default))
-                                .foregroundColor(Color("White"))
-                            Text("Flow")
-                                .font(.system(size: 50, weight: .light, design: .default))
-                                .foregroundColor(Color("Orange"))
-                        }
-                        .padding(.top, 50)
                         VStack (spacing: 20){
                             CustomTextField(placeholder: "Введите почту", text: $email, isSecure: false)
-                            PasswordField(placeholder: "Введите пароль", text: $password, isPasswordVisible: $isPasswordVisible)
+                            PasswordField(placeholder: "Введите пароль", text: $password, isPasswordVisible: .constant(false))
+                            
+                            if let errorMessage = errorMessage {
+                                Text(errorMessage)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
                             Button (action: {
                                 //
                             }){
@@ -42,7 +41,13 @@ struct LoginView: View {
                                     .padding(.trailing, 190)
                             }
                             Button (action: {
-                                //
+                                apiClient.login(email: email, password: password) { success, error in
+                                    if success {
+                                        presentationMode.wrappedValue.dismiss()
+                                    } else{
+                                        self.errorMessage = error
+                                    }
+                                }
                             }){
                                 Text("Войти")
                                     .font(.system(size: 22, weight: .light, design: .default))

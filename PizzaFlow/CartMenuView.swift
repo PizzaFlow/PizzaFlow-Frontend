@@ -10,12 +10,9 @@ import SwiftUI
 struct CartMenuView: View {
     @Binding var selectedTab: Tab
     var body: some View {
-        NavigationStack {
             Color("Dark").ignoresSafeArea(.all)
             Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
                 .foregroundColor(.white)
-        }
-        .navigationBarHidden(true)
     }
 }
 

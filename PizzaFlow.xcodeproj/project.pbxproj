@@ -13,6 +13,7 @@
 		B6013FF12D750CD2007563C6 /* Tab Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6013FF02D750CD2007563C6 /* Tab Model.swift */; };
 		B6013FF32D751371007563C6 /* LikemenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6013FF22D751371007563C6 /* LikemenuView.swift */; };
 		B6013FF52D7513B1007563C6 /* CartMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6013FF42D7513B1007563C6 /* CartMenuView.swift */; };
+		B62A0EE92D78CBC200F78B5F /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */; };
 		B663E05B2D7355D6008129DA /* PizzaFlowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B663E05A2D7355D6008129DA /* PizzaFlowApp.swift */; };
 		B663E05D2D7355D6008129DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B663E05C2D7355D6008129DA /* ContentView.swift */; };
 		B663E05F2D7355D9008129DA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B663E05E2D7355D9008129DA /* Assets.xcassets */; };
@@ -35,6 +36,7 @@
 		B6013FF02D750CD2007563C6 /* Tab Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Tab Model.swift"; sourceTree = "<group>"; };
 		B6013FF22D751371007563C6 /* LikemenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikemenuView.swift; sourceTree = "<group>"; };
 		B6013FF42D7513B1007563C6 /* CartMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartMenuView.swift; sourceTree = "<group>"; };
+		B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
 		B663E0572D7355D6008129DA /* PizzaFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PizzaFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B663E05A2D7355D6008129DA /* PizzaFlowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PizzaFlowApp.swift; sourceTree = "<group>"; };
 		B663E05C2D7355D6008129DA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 			children = (
 				B6013FF02D750CD2007563C6 /* Tab Model.swift */,
 				B6C248942D7852E600B88F0F /* PizzaModel.swift */,
+				B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -258,6 +261,7 @@
 				B68F6FCD2D74715B00F8E5B4 /* AppDelegate.swift in Sources */,
 				B663E05D2D7355D6008129DA /* ContentView.swift in Sources */,
 				B663E0692D7356FE008129DA /* LoginView.swift in Sources */,
+				B62A0EE92D78CBC200F78B5F /* LoginResponse.swift in Sources */,
 				B6C248992D788B1900B88F0F /* ProfileMenuView.swift in Sources */,
 				B68F6FC62D73CB5200F8E5B4 /* MainMenuView.swift in Sources */,
 				B6C248972D78532D00B88F0F /* ApiClient.swift in Sources */,

@@ -11,7 +11,8 @@
 ## 🚀 Технологии
 ### 📡 Бэкенд:
 - [FastAPI](https://fastapi.tiangolo.com/) — фреймворк для создания API
-- [Firebase](https://firebase.google.com/) — база данных и аутентификация
+- [PostgreSQL](https://www.postgresql.org/) — база данных
+- [Firebase](https://firebase.google.com/) - хранение статических файлов
 
 ### 📱 iOS фронтенд:
 - [SwiftUI](https://developer.apple.com/xcode/swiftui/) — фреймворк для разработки интерфейса

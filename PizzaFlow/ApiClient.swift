@@ -8,7 +8,10 @@
 import Foundation
 
 class ApiClient: ObservableObject {
+    private let baseURL = "http://localhost:8000"
     @Published var pizzas: [Pizza] = []
+    @Published var ingridients: [Ingredient] = []
+    @Published var pizzaIngredients: [Ingredient] = []
     @Published var token: String? {
         didSet{
             if let token = token {
@@ -23,7 +26,7 @@ class ApiClient: ObservableObject {
     }
     
     func fetchPizzas() {
-        guard let url = URL(string: "http://localhost:8000/pizzas") else {return}
+        guard let url = URL(string: "\(baseURL)/pizzas/") else {return}
         
         var request = URLRequest(url: url)
         if let token = token {
@@ -50,8 +53,38 @@ class ApiClient: ObservableObject {
         }
         task.resume()
     }
+    func fetchAllIngredients() {
+        guard let url = URL(string: "\(baseURL)/ingredients/") else { return }
+
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Ошибка запроса ингредиентов: \(error.localizedDescription)")
+                return
+            }
+            guard let data = data else {
+                print("❌ Нет данных от сервера")
+                return
+            }
+            do {
+                let decodedData = try JSONDecoder().decode([Ingredient].self, from: data)
+                DispatchQueue.main.async {
+                    self.ingridients = decodedData
+                }
+            } catch {
+                print("❌ Ошибка декодирования JSON: \(error.localizedDescription)")
+            }
+        }
+        task.resume()
+    }
+    
+   
     func register(username: String, email: String, password: String, completion: @escaping(Bool, String?) -> Void) {
-        guard let url = URL(string: "http://localhost:8000/registration") else {return}
+        guard let url = URL(string: "\(baseURL)/auth/register") else {return}
         
         let requestBody = ["username": username, "email": email, "password": password]
         var request = URLRequest(url: url)
@@ -79,7 +112,7 @@ class ApiClient: ObservableObject {
     }
     
     func login(email: String, password: String, completion: @escaping(Bool, String?) -> Void) {
-        guard let url = URL(string: "http://localhost:8000/login") else {return}
+        guard let url = URL(string: "\(baseURL)/auth/login") else {return}
         
         let requestBody = ["email": email, "password": password]
         var request = URLRequest(url: url)

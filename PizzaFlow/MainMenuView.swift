@@ -61,12 +61,14 @@ struct MainMenuView: View {
 struct PizzaCardView: View {
     let pizza: Pizza
     @State private var isFavorite: Bool = false
+    @State private var isIngridientPresented = false
+    @State private var selectedIngredients: [Ingredient] = []
     var body: some View {
         VStack(spacing: 0) {
             AsyncImage(url: URL(string: pizza.photo)) {image in
                 image.resizable()
             } placeholder: {
-                ProgressView()
+                Image(systemName: "photo").resizable().scaledToFit().foregroundColor(.gray)
             }
             .scaledToFit()
             .frame(height: 130)
@@ -93,7 +95,7 @@ struct PizzaCardView: View {
                     // Spacer()
                     
                     Button(action:{
-                        //
+                        isIngridientPresented.toggle()
                     }) {
                         HStack{
                             Image(systemName: "plus")
@@ -105,6 +107,9 @@ struct PizzaCardView: View {
                         .padding(.vertical, 8)
                         .background(Color("Orange"))
                         .cornerRadius(15)
+                    }
+                    .sheet(isPresented: $isIngridientPresented){
+                        IngridientView(pizza: pizza, selectedIngredients: pizza.ingredients)
                     }
                 }
                 .padding(.bottom, 40)

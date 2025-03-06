@@ -14,6 +14,10 @@
 		B6013FF32D751371007563C6 /* LikemenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6013FF22D751371007563C6 /* LikemenuView.swift */; };
 		B6013FF52D7513B1007563C6 /* CartMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6013FF42D7513B1007563C6 /* CartMenuView.swift */; };
 		B62A0EE92D78CBC200F78B5F /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */; };
+		B62A0EEB2D79761800F78B5F /* IngridientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EEA2D79761800F78B5F /* IngridientView.swift */; };
+		B62A0EED2D79791E00F78B5F /* IngridientModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EEC2D79791E00F78B5F /* IngridientModel.swift */; };
+		B62A0EEF2D79819200F78B5F /* AllIngredientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EEE2D79819200F78B5F /* AllIngredientsView.swift */; };
+		B62A0EF12D7982FF00F78B5F /* IngredientRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62A0EF02D7982FF00F78B5F /* IngredientRow.swift */; };
 		B663E05B2D7355D6008129DA /* PizzaFlowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B663E05A2D7355D6008129DA /* PizzaFlowApp.swift */; };
 		B663E05D2D7355D6008129DA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B663E05C2D7355D6008129DA /* ContentView.swift */; };
 		B663E05F2D7355D9008129DA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B663E05E2D7355D9008129DA /* Assets.xcassets */; };
@@ -37,6 +41,10 @@
 		B6013FF22D751371007563C6 /* LikemenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikemenuView.swift; sourceTree = "<group>"; };
 		B6013FF42D7513B1007563C6 /* CartMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartMenuView.swift; sourceTree = "<group>"; };
 		B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
+		B62A0EEA2D79761800F78B5F /* IngridientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngridientView.swift; sourceTree = "<group>"; };
+		B62A0EEC2D79791E00F78B5F /* IngridientModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngridientModel.swift; sourceTree = "<group>"; };
+		B62A0EEE2D79819200F78B5F /* AllIngredientsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllIngredientsView.swift; sourceTree = "<group>"; };
+		B62A0EF02D7982FF00F78B5F /* IngredientRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientRow.swift; sourceTree = "<group>"; };
 		B663E0572D7355D6008129DA /* PizzaFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PizzaFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B663E05A2D7355D6008129DA /* PizzaFlowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PizzaFlowApp.swift; sourceTree = "<group>"; };
 		B663E05C2D7355D6008129DA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -119,6 +127,9 @@
 				B6F1F5582D76EDBE00B0C32E /* SplashScreenView.swift */,
 				B6C248962D78532D00B88F0F /* ApiClient.swift */,
 				B6C248982D788B1900B88F0F /* ProfileMenuView.swift */,
+				B62A0EEA2D79761800F78B5F /* IngridientView.swift */,
+				B62A0EEE2D79819200F78B5F /* AllIngredientsView.swift */,
+				B62A0EF02D7982FF00F78B5F /* IngredientRow.swift */,
 			);
 			path = PizzaFlow;
 			sourceTree = "<group>";
@@ -137,6 +148,7 @@
 				B6013FF02D750CD2007563C6 /* Tab Model.swift */,
 				B6C248942D7852E600B88F0F /* PizzaModel.swift */,
 				B62A0EE82D78CBC200F78B5F /* LoginResponse.swift */,
+				B62A0EEC2D79791E00F78B5F /* IngridientModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,12 +273,16 @@
 				B68F6FCD2D74715B00F8E5B4 /* AppDelegate.swift in Sources */,
 				B663E05D2D7355D6008129DA /* ContentView.swift in Sources */,
 				B663E0692D7356FE008129DA /* LoginView.swift in Sources */,
+				B62A0EEB2D79761800F78B5F /* IngridientView.swift in Sources */,
+				B62A0EEF2D79819200F78B5F /* AllIngredientsView.swift in Sources */,
 				B62A0EE92D78CBC200F78B5F /* LoginResponse.swift in Sources */,
+				B62A0EED2D79791E00F78B5F /* IngridientModel.swift in Sources */,
 				B6C248992D788B1900B88F0F /* ProfileMenuView.swift in Sources */,
 				B68F6FC62D73CB5200F8E5B4 /* MainMenuView.swift in Sources */,
 				B6C248972D78532D00B88F0F /* ApiClient.swift in Sources */,
 				B6013FF52D7513B1007563C6 /* CartMenuView.swift in Sources */,
 				B663E05B2D7355D6008129DA /* PizzaFlowApp.swift in Sources */,
+				B62A0EF12D7982FF00F78B5F /* IngredientRow.swift in Sources */,
 				B6013FF12D750CD2007563C6 /* Tab Model.swift in Sources */,
 				B68F6FCB2D7457F700F8E5B4 /* RegistrationView.swift in Sources */,
 				B6F1F5592D76EDBE00B0C32E /* SplashScreenView.swift in Sources */,

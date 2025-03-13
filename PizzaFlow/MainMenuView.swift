@@ -75,9 +75,11 @@ struct MainMenuView: View {
 struct PizzaCardView: View {
     @EnvironmentObject var apiClient: ApiClient
     let pizza: Pizza
-    @State private var isFavorite: Bool = false
     @State private var isIngridientPresented = false
     @State private var selectedIngredients: [Ingredient] = []
+    var isFavorite: Bool {
+        apiClient.favoritePizzas.contains(where: { $0.id == pizza.id })
+    }
     var body: some View {
         VStack(spacing: 0) {
             AsyncImage(url: URL(string: pizza.photo)) {image in
@@ -100,26 +102,24 @@ struct PizzaCardView: View {
                     .padding(.leading)
                 Spacer()
                 HStack {
-                    Button(action:{ 
-                        isFavorite.toggle()
+                    Button(action:{
                         if isFavorite {
-                            apiClient.addPizzatoFavorites(pizzaID: pizza.id) { success, message in
-                                if success {
-                                    print("✅ Пицца добавлена в избранное")
-                                    apiClient.fetchFavoritePizzas(completion: { _, _ in })
-                                } else {
-                                    print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
-                                    isFavorite = false
-                                }
-                            }
-                        } else {
                             apiClient.removePizzaFromFavorites(pizzaID: pizza.id) { success, message in
                                 if success {
                                     print("✅ Пицца удалена из избранного")
                                     apiClient.fetchFavoritePizzas(completion: { _, _ in })
                                 } else {
                                     print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
-                                    isFavorite = true
+                                }
+                            }
+                        } else {
+                            apiClient.addPizzatoFavorites(pizzaID: pizza.id) { success, message in
+                                if success {
+                                    
+                                    print("✅ Пицца добавлена в избранное")
+                                    apiClient.fetchFavoritePizzas(completion: { _, _ in })
+                                } else {
+                                    print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
                                 }
                             }
                         }
@@ -161,9 +161,6 @@ struct PizzaCardView: View {
             RoundedRectangle(cornerRadius: 15)
                 .stroke(Color.white.opacity(0.2), lineWidth: 1)
         )
-        .onAppear {
-            isFavorite = apiClient.favoritePizzas.contains(where: { $0.id == pizza.id })
-        }
     }
 }
 

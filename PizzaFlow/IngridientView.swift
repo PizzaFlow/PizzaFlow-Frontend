@@ -54,7 +54,7 @@ struct IngridientView: View {
             }
             .padding(8)
             .sheet(isPresented: $isAddingIngredient) {
-                AllIngredientsView(selectedIngredients: $selectedIngredients)
+                AllIngredientsView(selectedIngredients: $selectedIngredients, pizza: pizza)
                     .environmentObject(apiClient)
             }
 

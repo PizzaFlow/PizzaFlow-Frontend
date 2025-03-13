@@ -22,20 +22,6 @@ struct AllIngredientsView: View {
                                   isSelected: selectedIngredients.contains(where: { $0.id == ingredient.id}),
                                   onToggle: { toggleIngredient(ingredient) })
                 }
-                
-//                if selectedIngredients.contains(where: { $0.id == ingredient.id }){
-//                    Image(systemName: "checkmark.circle.fill")
-//                        .foregroundColor(.green)
-//                } else {
-//                    Button(action: {
-//                        addIngredients(ingredient)
-//                    }) {
-//                        Text("+")
-//                            .foregroundColor(Color("Orange"))
-//                            .padding(.horizontal, 16)
-//                            .padding(.vertical, 8)
-//                    }
-//                }
         }
         .onAppear {
             apiClient.fetchAllIngredients()

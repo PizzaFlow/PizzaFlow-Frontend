@@ -11,7 +11,8 @@ import SwiftUI
 struct PizzaFlowApp: App {
     @StateObject var apiClient = ApiClient()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var showSplash = true // Показываем сплэш при запуске
+    @State private var showSplash = true 
+    @StateObject var cartManager = CartManager()
 
     var body: some Scene {
         WindowGroup {
@@ -20,6 +21,7 @@ struct PizzaFlowApp: App {
             } else {
                 ContentView()
                     .environmentObject(apiClient)
+                    .environmentObject(cartManager)
             }
         }
     }

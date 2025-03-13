@@ -7,9 +7,12 @@
 
 import Foundation
 
-struct Ingredient: Identifiable, Codable {
+struct Ingredient: Identifiable, Codable, Equatable {
     let id: Int
     let name: String
     let price: Double
-    let photo: String?
+    let photo: String
+    static func == (lhs: Ingredient, rhs: Ingredient) -> Bool {
+        return lhs.id == rhs.id
+    }
 }

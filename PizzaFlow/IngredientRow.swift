@@ -50,10 +50,3 @@ struct IngredientRow: View {
         .padding()
     }
 }
-#Preview {
-    IngredientRow(
-        ingredient: Ingredient(id: 1, name: "Сыр", price: 50.0, photo: nil),
-        isSelected: false,
-        onToggle: {}
-    )
-}

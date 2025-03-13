@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainMenuView: View {
     @Binding var selectedTab: Tab
-    @StateObject var apiClient = ApiClient()
+    @ObservedObject var apiClient = ApiClient()
     let calumns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -42,6 +42,7 @@ struct MainMenuView: View {
                         LazyVGrid(columns: calumns, spacing: 20) {
                             ForEach(apiClient.pizzas) {pizza in
                                 PizzaCardView(pizza: pizza)
+                                    .environmentObject(apiClient)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -54,11 +55,25 @@ struct MainMenuView: View {
         }
         .navigationBarHidden(true)
         .onAppear{
+            print("🔄 onAppear вызван")
             apiClient.fetchPizzas()
+            apiClient.fetchFavoritePizzas{ success, errorMessage in
+                if success {
+                    print("✅ Избранные пиццы успешно загружены!")
+                } else {
+                    print("❌ Ошибка загрузки избранных пицц: \(errorMessage ?? "Неизвестная ошибка")")
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                print("🔄 Принудительное обновление UI")
+            }
         }
     }
 }
+
 struct PizzaCardView: View {
+    @EnvironmentObject var apiClient: ApiClient
     let pizza: Pizza
     @State private var isFavorite: Bool = false
     @State private var isIngridientPresented = false
@@ -85,7 +100,30 @@ struct PizzaCardView: View {
                     .padding(.leading)
                 Spacer()
                 HStack {
-                    Button(action:{ isFavorite.toggle() }){
+                    Button(action:{ 
+                        isFavorite.toggle()
+                        if isFavorite {
+                            apiClient.addPizzatoFavorites(pizzaID: pizza.id) { success, message in
+                                if success {
+                                    print("✅ Пицца добавлена в избранное")
+                                    apiClient.fetchFavoritePizzas(completion: { _, _ in })
+                                } else {
+                                    print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
+                                    isFavorite = false
+                                }
+                            }
+                        } else {
+                            apiClient.removePizzaFromFavorites(pizzaID: pizza.id) { success, message in
+                                if success {
+                                    print("✅ Пицца удалена из избранного")
+                                    apiClient.fetchFavoritePizzas(completion: { _, _ in })
+                                } else {
+                                    print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
+                                    isFavorite = true
+                                }
+                            }
+                        }
+                    }){
                         Image(systemName: isFavorite ? "heart.fill" : "heart")
                             .resizable()
                             .frame(width: 24, height: 24)
@@ -123,6 +161,9 @@ struct PizzaCardView: View {
             RoundedRectangle(cornerRadius: 15)
                 .stroke(Color.white.opacity(0.2), lineWidth: 1)
         )
+        .onAppear {
+            isFavorite = apiClient.favoritePizzas.contains(where: { $0.id == pizza.id })
+        }
     }
 }
 

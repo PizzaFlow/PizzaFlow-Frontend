@@ -13,8 +13,10 @@ class ApiClient: ObservableObject {
     @Published var ingridients: [Ingredient] = []
     @Published var favoritePizzas: [Pizza] = []
     @Published var pizzaIngredients: [Ingredient] = []
+    @Published var addresses: [Address] = []
+    @Published var selectedAddress: Address?
     @Published var token: String? {
-        didSet{
+        didSet {
             if let token = token {
                 UserDefaults.standard.set(token, forKey: "authToken")
             } else {
@@ -22,13 +24,14 @@ class ApiClient: ObservableObject {
             }
         }
     }
-    init(){
+    init() {
         self.token = UserDefaults.standard.string(forKey: "authToken")
+        fetchAddresses()
     }
     
     func fetchPizzas() {
         print("🔄 Вызван fetchPizzas()")
-        guard let url = URL(string: "\(baseURL)/pizzas") else {return}
+        guard let url = URL(string: "\(baseURL)/pizzas") else { return }
         
         var request = URLRequest(url: url)
         if let token = token {
@@ -50,7 +53,7 @@ class ApiClient: ObservableObject {
                 print("❌ Ошибка: Сервер вернул код \(httpResponse.statusCode)")
                 return
             }
-            guard let  data = data else {
+            guard let data = data else {
                 print("Нет данных")
                 return
             }
@@ -75,6 +78,179 @@ class ApiClient: ObservableObject {
         task.resume()
     }
     
+    func fetchAddresses() {
+        guard let url = URL(string: "\(baseURL)/users/address/") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Ошибка загрузки адресов: \(error.localizedDescription)")
+                return
+            }
+            guard let data = data else { return }
+            do {
+                let decodedData = try JSONDecoder().decode([Address].self, from: data)
+                DispatchQueue.main.async {
+                    print("Полученные адреса: \(decodedData)")  // Логирование полученных данных
+                    self.addresses = decodedData
+                    if self.selectedAddress == nil, let firstAddress = decodedData.first {
+                        self.selectedAddress = firstAddress
+                    }
+                }
+            } catch {
+                print("❌ Ошибка декодирования JSON: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
+    
+    func addAddress(city: String, street: String, house: String, apartment: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let token = token else {
+            completion(false, "Нет токена")
+            return
+        }
+        
+        guard let url = URL(string: "\(baseURL)/users/address/") else { return }
+        
+        let requestBody: [String: String] = [
+            "city": city,
+            "street": street,
+            "house": house,
+            "apartment": apartment
+        ]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, "Ошибка: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    completion(false, "Нет ответа от сервера")
+                }
+                return
+            }
+            
+            if httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    print("✅ Адрес успешно добавлен!")
+                    self.fetchAddresses() // Обновляем список адресов
+                    completion(true, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    let errorMessage = "Ошибка: сервер вернул \(httpResponse.statusCode)"
+                    completion(false, errorMessage)
+                }
+            }
+        }.resume()
+    }
+    
+    func deleteAddress(addressID: Int) {
+        guard let token = token else {
+            print("❌ Ошибка: нет токена авторизации")
+            return
+        }
+        
+        guard let url = URL(string: "\(baseURL)/users/address/\(addressID)") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    print("❌ Ошибка удаления адреса: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    print("❌ Ошибка: сервер не дал ответа")
+                }
+                return
+            }
+            
+            if httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    print("✅ Адрес успешно удалён!")
+                    self.addresses.removeAll { $0.id == addressID } // Удаляем адрес из списка
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("❌ Ошибка удаления: сервер вернул \(httpResponse.statusCode)")
+                }
+            }
+        }.resume()
+    }
+    
+    func sendAddressToServer(city: String, street: String, house: String, apartment: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let token = token else {
+            print("❌ Ошибка: нет токена авторизации")
+            completion(false, "Нет токена")
+            return
+        }
+        
+        guard let url = URL(string: "\(baseURL)/users/address/") else { return }
+        
+        let requestBody: [String: String] = [
+            "city": city,
+            "street": street,
+            "house": house,
+            "apartment": apartment
+        ]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    print("❌ Ошибка запроса: \(error.localizedDescription)")
+                    completion(false, error.localizedDescription)
+                }
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    print("❌ Ошибка: сервер не дал ответа")
+                    completion(false, "Нет ответа сервера")
+                }
+                return
+            }
+            
+            if httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    print("✅ Адрес успешно добавлен!")
+                    completion(true, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    let errorMessage = "Ошибка: сервер вернул \(httpResponse.statusCode)"
+                    print("❌ \(errorMessage)")
+                    completion(false, errorMessage)
+                }
+            }
+        }.resume()
+    }
     
     func fetchAllIngredients() {
         guard let url = URL(string: "\(baseURL)/ingredients") else { return }
@@ -105,14 +281,13 @@ class ApiClient: ObservableObject {
         task.resume()
     }
     
-    
     func fetchFavoritePizzas(completion: @escaping (Bool, String?) -> Void) {
         guard let token = token, !token.isEmpty else {
             print("❌ Ошибка: токен отсутствует!")
             completion(false, "❌ Токен отсутствует")
             return
         }
-        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/") else {return}
+        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -157,8 +332,8 @@ class ApiClient: ObservableObject {
         task.resume()
     }
     
-    func addPizzatoFavorites(pizzaID: Int, completion: @escaping (Bool, String?) -> Void){
-        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/\(pizzaID)") else {return}
+    func addPizzaToFavorites(pizzaID: Int, completion: @escaping (Bool, String?) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/\(pizzaID)") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         if let token = token {
@@ -167,12 +342,12 @@ class ApiClient: ObservableObject {
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ Ошибка добавления в избранное : \(error.localizedDescription)")
+                print("❌ Ошибка добавления в избранное: \(error.localizedDescription)")
                 return
             }
             DispatchQueue.main.async {
-                self.fetchFavoritePizzas { succes, error in
-                    if succes {
+                self.fetchFavoritePizzas { success, error in
+                    if success {
                         print("✅ Избранные пиццы успешно загружены!")
                     } else {
                         print("❌ Ошибка загрузки избранных пицц: \(error ?? "Неизвестная ошибка")")
@@ -183,8 +358,8 @@ class ApiClient: ObservableObject {
         task.resume()
     }
     
-    func removePizzaFromFavorites(pizzaID: Int, completion: @escaping(Bool, String?) -> Void) {
-        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/\(pizzaID)") else {return}
+    func removePizzaFromFavorites(pizzaID: Int, completion: @escaping (Bool, String?) -> Void) {
+        guard let url = URL(string: "\(baseURL)/users/favorite-pizzas/\(pizzaID)") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         if let token = token {
@@ -213,25 +388,23 @@ class ApiClient: ObservableObject {
         }.resume()
     }
 
-    
-   
-    func register(username: String, email: String, password: String, completion: @escaping(Bool, String?) -> Void) {
-        guard let url = URL(string: "\(baseURL)/auth/register") else {return}
+    func register(username: String, email: String, password: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let url = URL(string: "\(baseURL)/auth/register") else { return }
         
-        let requestBody = ["username": username, "email": email, "password": password]
+        let requestBody = ["email": email, "password": password]
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody, options: [])
                 
-        URLSession.shared.dataTask(with: request) {data, response, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
                     completion(false, error.localizedDescription)
                 }
                 return
             }
-            guard let data = data else{
+            guard let data = data else {
                 DispatchQueue.main.async {
                     completion(false, "Нет данных о сервере")
                 }
@@ -243,8 +416,8 @@ class ApiClient: ObservableObject {
         }.resume()
     }
     
-    func login(email: String, password: String, completion: @escaping(Bool, String?) -> Void) {
-        guard let url = URL(string: "\(baseURL)/auth/login") else {return}
+    func login(email: String, password: String, completion: @escaping (Bool, String?) -> Void) {
+        guard let url = URL(string: "\(baseURL)/auth/login") else { return }
         
         let requestBody = ["email": email, "password": password]
         var request = URLRequest(url: url)
@@ -255,7 +428,7 @@ class ApiClient: ObservableObject {
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: .prettyPrinted)
             request.httpBody = jsonData
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("ОТправляемый Json: \(jsonString)")
+                print("Отправляемый JSON: \(jsonString)")
             }
         } catch {
             print("❌ Ошибка создания JSON: \(error.localizedDescription)")
@@ -263,7 +436,7 @@ class ApiClient: ObservableObject {
             return
         }
         print("URL запроса: \(request.url!.absoluteString)")
-        URLSession.shared.dataTask(with: request) {data, response, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
                     print("❌ Ошибка запроса: \(error.localizedDescription)")
@@ -271,7 +444,7 @@ class ApiClient: ObservableObject {
                 }
                 return
             }
-            guard let data = data else{
+            guard let data = data else {
                 DispatchQueue.main.async {
                     print("❌ Сервер не отвечает")
                     completion(false, "Нет данных о сервере")
@@ -314,6 +487,7 @@ class ApiClient: ObservableObject {
             }
         }.resume()
     }
+    
     func logout() {
         token = nil
     }

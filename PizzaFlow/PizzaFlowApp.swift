@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct PizzaFlowApp: App {
     @StateObject var apiClient = ApiClient()
+    @StateObject private var locationManager = LocationManager()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var showSplash = true 
     @StateObject var cartManager = CartManager()
@@ -22,6 +23,7 @@ struct PizzaFlowApp: App {
                 ContentView()
                     .environmentObject(apiClient)
                     .environmentObject(cartManager)
+                    .environmentObject(locationManager)
             }
         }
     }

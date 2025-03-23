@@ -10,6 +10,7 @@ import SwiftUI
 struct MainMenuView: View {
     @Binding var selectedTab: Tab
     @ObservedObject var apiClient = ApiClient()
+    @State private var showAddressSheet = false
     let calumns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -23,14 +24,34 @@ struct MainMenuView: View {
                         HStack(spacing: 4){
                             Image(systemName: "mappin.and.ellipse")
                                 .foregroundColor(Color("Orange"))
-                            Text("Волокамское шоссе, 4")
-                                .foregroundColor(.white)
-                                .font(.system(size: 18, weight: .medium))
+                            
                             Button(action:{
-                                //
+                                showAddressSheet = true
                             }){
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(Color("Orange"))
+                                HStack {
+                                    if let selectedAddress = apiClient.selectedAddress {
+                                        Text("\(selectedAddress.city), \(selectedAddress.street), \(selectedAddress.house)")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .lineLimit(1)
+                                    } else if apiClient.addresses.isEmpty {
+                                        Text("Добавьте адрес")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .lineLimit(1)
+                                    } else {
+                                        Text("Выберите адрес")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .lineLimit(1)
+                                    }
+                                    
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(Color("Orange"))
+                                }
+                            }
+                            .sheet(isPresented: $showAddressSheet) { 
+                                AddressListSheet(apiClient: apiClient)
                             }
                         }
                         Spacer()
@@ -113,7 +134,7 @@ struct PizzaCardView: View {
                                 }
                             }
                         } else {
-                            apiClient.addPizzatoFavorites(pizzaID: pizza.id) { success, message in
+                            apiClient.addPizzaToFavorites(pizzaID: pizza.id) { success, message in
                                 if success {
                                     
                                     print("✅ Пицца добавлена в избранное")

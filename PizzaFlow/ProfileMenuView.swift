@@ -1,5 +1,5 @@
 //
-//  ProfileMenuVIew.swift
+//  ProfileMenuView.swift
 //  PizzaFlow
 //
 //  Created by 596 on 05.03.2025.
@@ -12,68 +12,101 @@ struct ProfileMenuView: View {
     @State private var isRegistrationPresented = false
     @Binding var selectedTab: Tab
     @EnvironmentObject var apiClient: ApiClient
+    @State private var isEditProfilePresented = false
+    
     var body: some View {
         Color("Dark").ignoresSafeArea(.all)
-        VStack(spacing: 20) {
+        VStack {
             if apiClient.token == nil {
-                Text("Вы не вошли в аккаунт,")
-                    .font(.system(size: 28, weight: .light, design: .default))
-                    .foregroundColor(.white)
-                // Spacer()
-                Button(action:{
-                    isLoginPresented.toggle()
-                }){
-                    Text("Войдите")
-                        .font(.title)
-                        .foregroundColor(Color("Orange"))
-                    
-                }
-                .fullScreenCover(isPresented: $isLoginPresented) {
-                    LoginView()
-                        .environmentObject(apiClient)
-                }
-                Text("или")
-                    .font(.title3)
-                    .foregroundColor(.white)
-                Button(action:{
-                    isRegistrationPresented.toggle()
-                }){
-                    Text("Зарегистрируйтесь")
-                        .font(.title)
-                        .foregroundColor(Color("Orange"))
-                    
-                }
-                .fullScreenCover(isPresented: $isRegistrationPresented){
-                    RegistrationView()
-                        .environmentObject(apiClient)
-                }
-                Text("чтобы управлять заказами!")
-                    .font(.title3)
-                    .foregroundColor(.white)
-                
-                Text("🍕")
-                    .font(.system(size: 40))
+                NotLoggedInView(isLoginPresented: $isLoginPresented, isRegistrationPresented: $isRegistrationPresented)
             } else {
-                Text("Вы вошли")
-                
-                Button(action:{
-                    apiClient.logout()
-                }){
-                    HStack{
-                        Image(systemName: "door.right.hand.open")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                        Text("Выйти из аккаунта")
+                LoggedInView(isEditProfilePresented: $isEditProfilePresented, selectedTab: $selectedTab)
+            }
+        }
+        .onAppear {
+            Task {
+                if apiClient.token != nil {
+                    if await apiClient.currentUser == nil {
+                        apiClient.fetchCurrentUser { result in
+                            switch result {
+                            case .success(let user):
+                                print("User: \(user)")
+                            case .failure(let error):
+                                print("Error: \(error.localizedDescription)")
+                            }
+                        }
                     }
-                    .foregroundColor(.red)
                 }
             }
         }
-                    
+    }
+    
+}
+
+struct NavigationOptionRow<Destination: View>: View {
+    let title: String
+    let icon: String
+    let destination: () -> Destination
+    
+    init(title: String, icon: String, @ViewBuilder destination: @escaping () -> Destination) {
+        self.title = title
+        self.icon = icon
+        self.destination = destination
+    }
+    
+    var body: some View {
+        NavigationLink(destination: destination()) {
+            OptionRowContent(title: title, icon: icon)
+        }
     }
 }
 
+struct ActionOptionRow: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            OptionRowContent(title: title, icon: icon)
+        }
+    }
+}
 
+// Выносим общее содержимое в отдельную структуру
+struct OptionRowContent: View {
+    let title: String
+    let icon: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 25, height: 25)
+                .foregroundColor(Color("Orange"))
+            
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 25, height: 25)
+                .foregroundColor(Color("Orange"))
+        }
+        .padding()
+        .background(Color("Dark"))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
+    }
+}
 #Preview {
     ProfileMenuView(selectedTab: .constant(.profile))
 }

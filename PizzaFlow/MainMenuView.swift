@@ -61,7 +61,7 @@ struct MainMenuView: View {
                     
                     ScrollView {
                         LazyVGrid(columns: calumns, spacing: 20) {
-                            ForEach(apiClient.pizzas) {pizza in
+                            ForEach(apiClient.pizzas, id: \.id) { pizza in
                                 PizzaCardView(pizza: pizza)
                                     .environmentObject(apiClient)
                             }
@@ -129,6 +129,7 @@ struct PizzaCardView: View {
                                 if success {
                                     print("✅ Пицца удалена из избранного")
                                     apiClient.fetchFavoritePizzas(completion: { _, _ in })
+                                    apiClient.movePizzaToMainList(pizza: pizza)
                                 } else {
                                     print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
                                 }
@@ -136,8 +137,8 @@ struct PizzaCardView: View {
                         } else {
                             apiClient.addPizzaToFavorites(pizzaID: pizza.id) { success, message in
                                 if success {
-                                    
                                     print("✅ Пицца добавлена в избранное")
+                                    apiClient.movePizzaToTop(pizza: pizza)
                                     apiClient.fetchFavoritePizzas(completion: { _, _ in })
                                 } else {
                                     print("❌ Ошибка: \(message ?? "Неизвестная ошибка")")
@@ -175,6 +176,7 @@ struct PizzaCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.white)
+            .padding([.leading, .trailing], 12)
         }
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 15))

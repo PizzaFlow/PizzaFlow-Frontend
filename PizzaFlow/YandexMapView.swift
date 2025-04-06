@@ -51,7 +51,11 @@ struct YandexMapView: UIViewRepresentable {
 
     class Coordinator: NSObject, YMKMapCameraListener {
         var parent: YandexMapView
-        
+        private var lastUpdateTime = Date()
+        private let updateInterval: TimeInterval = 1.0 // Задержка 1 сек между запросами
+        private var lastPosition: YMKPoint?
+        private let minDistance: Double = 50 // Минимальное расстояние для нового запроса (метры)
+
         init(_ parent: YandexMapView) {
             self.parent = parent
         }
@@ -59,13 +63,34 @@ struct YandexMapView: UIViewRepresentable {
         func onCameraPositionChanged(
             with map: YMKMap,
             cameraPosition: YMKCameraPosition,
-            cameraUpdateReason cameraUpdateSource: YMKCameraUpdateReason,
+            cameraUpdateReason: YMKCameraUpdateReason,
             finished: Bool
         ) {
-            if finished {
-                print("📍 Новая координата центра: \(cameraPosition.target.latitude), \(cameraPosition.target.longitude)")
-                parent.locationManager.fetchAddress(from: cameraPosition.target)
+            // 1. Пропускаем промежуточные обновления
+            guard finished else { return }
+            
+            // 2. Проверяем временной интервал
+            let now = Date()
+            guard now.timeIntervalSince(lastUpdateTime) > updateInterval else { return }
+            
+            // 3. Проверяем расстояние от предыдущей точки
+            if let lastPos = lastPosition {
+                let distance = calculateDistance(from: lastPos, to: cameraPosition.target)
+                guard distance > minDistance else { return }
             }
+            
+            // 4. Обновляем данные
+            lastUpdateTime = now
+            lastPosition = cameraPosition.target
+            
+            print("📍 Обновление: \(cameraPosition.target.latitude), \(cameraPosition.target.longitude)")
+            parent.locationManager.fetchAddress(from: cameraPosition.target)
+        }
+        
+        private func calculateDistance(from p1: YMKPoint, to p2: YMKPoint) -> Double {
+            let latDiff = p1.latitude - p2.latitude
+            let lonDiff = p1.longitude - p2.longitude
+            return sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111000 // Конвертация в метры
         }
     }
 }

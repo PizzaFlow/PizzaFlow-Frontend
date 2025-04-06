@@ -25,7 +25,6 @@ struct RegistrationView: View {
                     .padding(.top, 40)
                 Spacer(minLength: 5)
                 VStack(spacing: 16){
-                    CustomTextField(placeholder: "Введите имя пользователя", text: $username, isSecure: false)
                     CustomTextField(placeholder: "Введите почту", text: $email, isSecure: false)
                     PasswordField(placeholder: "Введите пароль", text: $password, isPasswordVisible: .constant(false))
                     PasswordField(placeholder: "Повторите пароль", text: $confirmPassword, isPasswordVisible: .constant(false))
@@ -37,7 +36,7 @@ struct RegistrationView: View {
                     
                     Button(action: {
                         if password == confirmPassword {
-                            apiClient.register(username: username, email: email, password: password) { success, error in
+                            apiClient.register(email: email, password: password) { success, error in
                                 if success {
                                     presentationMode.wrappedValue.dismiss()
                                 } else {

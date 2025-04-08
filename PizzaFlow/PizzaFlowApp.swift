@@ -17,14 +17,11 @@ struct PizzaFlowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if showSplash {
-                SplashScreenView(showSplash: $showSplash)
-            } else {
-                ContentView()
-                    .environmentObject(apiClient)
-                    .environmentObject(cartManager)
-                    .environmentObject(locationManager)
-            }
+            ContentView()
+                .environmentObject(apiClient)
+                .environmentObject(cartManager)
+                .environmentObject(locationManager)
+            
         }
     }
 }

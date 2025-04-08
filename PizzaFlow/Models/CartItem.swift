@@ -14,11 +14,11 @@ class CartItem: Identifiable {
     var quantity: Int
 
     var finalPrice: Double {
-        let basePrise = pizza.price
+        let basePrice = pizza.price
         let extraIngredientsPrice = selectedIngredients
-            .filter { ingredient in !pizza.ingredients.contains(where: { $0.id == ingredient.id }) }
+            .filter { ingredient in !(pizza.ingredients?.contains(where: { $0.id == ingredient.id }) ?? false) }
             .reduce(0) { $0 + $1.price }
-        return (basePrise + extraIngredientsPrice) * Double(quantity)
+        return (basePrice + extraIngredientsPrice) * Double(quantity)
     }
 
     init(id: UUID = UUID(), pizza: Pizza, selectedIngredients: [Ingredient], quantity: Int) {

@@ -63,7 +63,7 @@ struct LoggedInView: View {
                                 Spacer()
                             }
                             .padding()
-                            .frame(height: 120) // Фиксированная высота
+                            .frame(height: 120)
                             .frame(maxWidth: .infinity)
                             .background(
                                 RoundedRectangle(cornerRadius: 15)
@@ -73,10 +73,7 @@ struct LoggedInView: View {
                     
                         }
                         .padding(.horizontal)
-                        
-                            
-                        
-                        // Карточка "Мои заказы"
+ 
                             NavigationLink(destination: OrdersListView(apiClient: apiClient)) {
                             HStack {
                                 Image(systemName: "basket")
@@ -99,7 +96,7 @@ struct LoggedInView: View {
                                     .foregroundColor(Color("Orange"))
                             }
                             .padding()
-                            .frame(height: 80) // Такая же высота как у профиля
+                            .frame(height: 80)
                             .frame(maxWidth: .infinity)
                             .background(
                                 RoundedRectangle(cornerRadius: 15)
@@ -108,8 +105,7 @@ struct LoggedInView: View {
                             .cornerRadius(15)
                         }
                         .padding(.horizontal)
-                        
-                        // Остальные опции
+                            
                             VStack(spacing: 16) {
                                 NavigationOptionRow(title: "Способ оплаты", icon: "creditcard") {
                                     PaymentMethodsView()
@@ -136,7 +132,7 @@ struct LoggedInView: View {
         }
         .tint(Color("Orange"))
         .onAppear {
-            loadUserData() // Загружаем данные при появлении
+            loadUserData() 
         }
     }
     
@@ -150,8 +146,8 @@ struct LoggedInView: View {
     @MainActor
     private func updateDisplay(user: User) {
         DispatchQueue.main.async {
-            self.displayedUsername = user.username.isEmpty ? "Введите имя" : user.username
-            self.displayedPhone = user.phone_number.isEmpty ? "Введите номер" : formatPhoneNumber(user.phone_number)
+            self.displayedUsername = user.username?.isEmpty ?? true ? "Введите имя" : user.username ?? ""
+            self.displayedPhone = user.phone_number?.isEmpty ?? true ? "Введите номер" : formatPhoneNumber(user.phone_number ?? "")
             self.displayedEmail = user.email.isEmpty ? "Email не указан" : user.email
         }
     }

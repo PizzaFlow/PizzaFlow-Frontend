@@ -10,6 +10,7 @@ import SwiftUI
 struct AddressListSheet: View {
     @ObservedObject var apiClient: ApiClient
     @State private var showMapScreen = false
+    @Binding var selectedTab: Tab
     
     var body: some View {
         NavigationStack {
@@ -58,7 +59,7 @@ struct AddressListSheet: View {
                 }
                 
                 Button(action: {
-                    showMapScreen = true
+                    selectedTab = .map
                 }) {
                     Text("Добавить новый адрес")
                         .font(.headline)

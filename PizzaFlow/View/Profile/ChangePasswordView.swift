@@ -29,7 +29,6 @@ struct ChangePasswordView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Header
                     VStack(spacing: 8) {
                         Image(systemName: "lock.rotation")
                             .font(.system(size: 40))
@@ -46,7 +45,6 @@ struct ChangePasswordView: View {
                     }
                     .padding(.top, 24)
                     
-                    // Password Fields
                     VStack(spacing: 16) {
                         passwordField("Новый пароль", text: $newPassword, icon: "lock.fill")
                             .onChange(of: newPassword) { _ in
@@ -55,8 +53,6 @@ struct ChangePasswordView: View {
                        
                     }
                     .padding(.horizontal)
-                    
-                    // Toggle Password Visibility
                     Button(action: {
                         withAnimation {
                             showPassword.toggle()
@@ -72,7 +68,6 @@ struct ChangePasswordView: View {
                     }
                     .padding(.top, 8)
                     
-                    // Error Message
                     if let error = errorMessage {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
@@ -86,7 +81,6 @@ struct ChangePasswordView: View {
                         .cornerRadius(10)
                     }
                     
-                    // Save Button
                     Button(action: {
                         Task { await changePassword() }
                     }) {

@@ -24,7 +24,6 @@ struct PaymentMethodsView: View {
                     .foregroundColor(.white)
                     .padding(.top, 20)
                 
-                // Вариант 1: Оплата наличными
                 PaymentOptionView(
                     title: "Наличными при получении",
                     icon: "banknote",
@@ -35,7 +34,6 @@ struct PaymentMethodsView: View {
                     }
                 )
                 
-                // Вариант 2: Оплата картой
                 PaymentOptionView(
                     title: "Картой при получении",
                     icon: "creditcard",
@@ -105,7 +103,6 @@ struct PaymentOptionView: View {
     }
 }
 
-// В ApiClient добавьте:
 enum PaymentMethod: String, Codable {
     case cash, card
 }
@@ -113,12 +110,11 @@ enum PaymentMethod: String, Codable {
 extension ApiClient {
     var paymentMethod: PaymentMethod {
         get {
-            // Получаем из UserDefaults или другого хранилища
             UserDefaults.standard.string(forKey: "paymentMethod")
                 .flatMap { PaymentMethod(rawValue: $0) } ?? .cash
         }
         set {
-            // Сохраняем в UserDefaults или другое хранилище
+
             UserDefaults.standard.set(newValue.rawValue, forKey: "paymentMethod")
             objectWillChange.send()
         }

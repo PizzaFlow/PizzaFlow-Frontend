@@ -12,13 +12,14 @@ struct Pizza: Codable, Identifiable {
     let price: Double
     let description: String
     let photo: String
-    let ingredients: [Ingredient]
+    let ingredients: [Ingredient]?
     var quantity: Int = 1
     
     enum CodingKeys: String, CodingKey {
         case id, name, price, description, photo, ingredients
     }
+    
     var totalPrice: Double {
-        price + ingredients.reduce(0) { $0 + $1.price }
+        price + (ingredients?.reduce(0) { $0 + $1.price } ?? 0)
     }
 }

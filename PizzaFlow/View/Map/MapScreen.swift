@@ -38,13 +38,15 @@ struct MapScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .edgesIgnoringSafeArea(.all)
 
-            addressSheet
             Image(systemName: "mappin.and.ellipse")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 40, height: 40)
                 .foregroundColor(Color("Orange"))
-                .offset(y: -20)
+                .position(x: UIScreen.main.bounds.width / 2, y: (UIScreen.main.bounds.height - minHeight) / 2) // Фиксируем в центре карты
+
+
+            addressSheet
         }
         .edgesIgnoringSafeArea(.all)
         .onChange(of: cameraPosition) { oldValue, newValue in

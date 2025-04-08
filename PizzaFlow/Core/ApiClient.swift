@@ -28,7 +28,9 @@ class ApiClient: ObservableObject {
     @Published var favoritePizzas: [Pizza] = []
     @Published var pizzaIngredients: [Ingredient] = []
     @Published var addresses: [Address] = []
+    @Published var orders: [OrderResponse] = []
     @Published var selectedAddress: Address?
+    @Published var currentOrder: OrderResponse?
     private let userState = UserState()
     private let networkQueue = DispatchQueue(label: "network.queue", qos: .userInitiated)
     private var _currentUser: User?
@@ -110,6 +112,40 @@ class ApiClient: ObservableObject {
             }
         }
         task.resume()
+    }
+    
+    func fetchOrders() async throws {
+        guard let token = token else {
+            throw NetworkError.unauthorized
+        }
+        
+        let url = URL(string: "\(baseURL)/users/orders/")!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            let errorData = String(data: data, encoding: .utf8) ?? ""
+            print("Server error: \(errorData)")
+            throw NetworkError.serverError(statusCode: httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let orders = try decoder.decode([OrderResponse].self, from: data)
+            await MainActor.run {
+                self.orders = orders
+            }
+        } catch {
+            print("Decoding error: \(error)")
+            throw error
+        }
     }
     
     func fetchAddresses() {
@@ -286,6 +322,55 @@ class ApiClient: ObservableObject {
         }.resume()
     }
     
+    func createOrder(request: CreateOrderRequest) async throws -> OrderResponse {
+        guard let token = token else {
+            throw NetworkError.unauthorized
+        }
+        
+        let url = URL(string: "\(baseURL)/orders/")!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+        
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            let errorData = String(data: data, encoding: .utf8) ?? ""
+            print("Server error: \(errorData)")
+            throw NetworkError.serverError(statusCode: httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        
+        do {
+            let order = try decoder.decode(OrderResponse.self, from: data)
+            print("Successfully decoded order: \(order)")
+            return order
+        } catch let decodingError as DecodingError {
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                print("Missing key: \(key.stringValue)")
+                print("Coding path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                print("Debug context: \(context.debugDescription)")
+                print("Full response: \(String(data: data, encoding: .utf8) ?? "No data")")
+                throw decodingError
+            default:
+                print("Decoding error: \(decodingError.localizedDescription)")
+                throw decodingError
+            }
+        } catch {
+            print("Unknown error: \(error)")
+            throw error
+        }
+    }
+    
     func fetchAllIngredients() {
         guard let url = URL(string: "\(baseURL)/ingredients") else { return }
         
@@ -361,6 +446,27 @@ class ApiClient: ObservableObject {
             }
         }
         task.resume()
+    }
+    
+    func fetchDeliveryTimes() async throws -> [DeliveryTime] {
+        guard let token = token else {
+            throw NetworkError.unauthorized
+        }
+        
+        let url = URL(string: "\(baseURL)/orders/delivery-times/")!
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        do {
+            let response = try JSONDecoder().decode(DeliveryTimesResponse.self, from: data)
+            return response.deliveryTimes.map { DeliveryTime(timeRange: $0, day: .today) }
+        } catch {
+            print("Ошибка декодирования: \(error)")
+            print("Ответ сервера: \(String(data: data, encoding: .utf8) ?? "неизвестно")")
+            throw error
+        }
     }
     
     func addPizzaToFavorites(pizzaID: Int, completion: @escaping (Bool, String?) -> Void) {
@@ -480,8 +586,6 @@ class ApiClient: ObservableObject {
                 throw AuthError.currentPasswordRequired
             }
         }
-        
-        // Формируем тело запроса только с измененными полями
         var requestBody = [String: Any]()
         
         if let username = username {
@@ -725,7 +829,6 @@ class ApiClient: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.token = decodedResponse.access_token
-                    // Загружаем данные пользователя после успешного входа
                     self.fetchCurrentUser { result in
                         switch result {
                         case .success:

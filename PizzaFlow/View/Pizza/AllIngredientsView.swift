@@ -42,7 +42,7 @@ struct AllIngredientsView: View {
     private func calculateTotalPrice() -> Double {
         let price = pizza.price
         let extraIngredientsPrice = selectedIngredients
-            .filter { ingredient in !pizza.ingredients.contains(where: { $0.id == ingredient.id }) }
+            .filter { ingredient in !(pizza.ingredients?.contains(where: { $0.id == ingredient.id }) ?? false) }
             .reduce(0) { $0 + $1.price }
         return price + extraIngredientsPrice
     }

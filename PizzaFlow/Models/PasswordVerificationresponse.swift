@@ -23,5 +23,7 @@ struct ValidationErrorResponse: Codable {
 enum ValidationError: Error {
     case invalidPhoneNumber
     case passwordTooShort
+    case addressNotSelected
+    case timeNotSelected
 }
 

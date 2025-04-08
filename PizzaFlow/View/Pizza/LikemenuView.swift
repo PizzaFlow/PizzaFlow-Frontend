@@ -33,14 +33,13 @@ struct LikemenuView: View {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 20) {
                             ForEach(apiClient.favoritePizzas) { pizza in
-                                FavoritePizzaCardView(pizza: pizza)
+                                FavoritePizzaCardView(pizza: pizza, selectedTab: $selectedTab)
                             }
                         }
                     }
                 }
             }
             .onAppear {
-                // Правильный вызов метода с обработкой ошибок
                 apiClient.fetchFavoritePizzas { success, error in
                     DispatchQueue.main.async {
                         if !success {
@@ -55,5 +54,5 @@ struct LikemenuView: View {
 
 #Preview {
     LikemenuView(selectedTab: .constant(.favourites))
-        .environmentObject(ApiClient()) // Добавляем environmentObject для превью
+        .environmentObject(ApiClient()) 
 }

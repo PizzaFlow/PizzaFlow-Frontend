@@ -73,7 +73,6 @@ struct ActionOptionRow: View {
     }
 }
 
-// Выносим общее содержимое в отдельную структуру
 struct OptionRowContent: View {
     let title: String
     let icon: String

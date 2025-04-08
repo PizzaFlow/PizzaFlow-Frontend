@@ -7,19 +7,58 @@
 
 import Combine
 import YandexMapsMobile
+import CoreLocation
 
-class LocationManager: ObservableObject {
+class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var city: String = ""
     @Published var street: String = ""
     @Published var house: String = ""
     @Published var apartment: String = ""
+    @Published var currentLocation: YMKPoint?
 
     private let searchManager: YMKSearchManager
     private var searchSession: YMKSearchSession?
+    private let locationManager = CLLocationManager()
 
-    init() {
+    override init() {
         searchManager = YMKSearchFactory.instance().createSearchManager(with: .combined)
+        super.init()
+
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
+
+    // MARK: - CLLocationManagerDelegate
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        let point = YMKPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        currentLocation = point
+        print("📍 Текущая геолокация: \(point.latitude), \(point.longitude)")
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("❌ Ошибка получения геолокации: \(error)")
+        currentLocation = nil
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.startUpdatingLocation()
+        case .denied, .restricted:
+            print("❌ Доступ к геолокации запрещён")
+            currentLocation = nil
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        @unknown default:
+            break
+        }
+    }
+
+    // MARK: - Геокодирование (поиск адреса по координатам)
 
     func fetchAddress(from point: YMKPoint, completion: ((Bool) -> Void)? = nil) {
         let searchOptions = YMKSearchOptions()
@@ -51,7 +90,7 @@ class LocationManager: ObservableObject {
                 self?.city = components.first ?? ""
                 self?.street = components.count > 1 ? components[1] : ""
                 self?.house = components.count > 2 ? components[2] : ""
-                self?.apartment = "" // Квартиру можно вводить вручную
+                self?.apartment = "" 
 
                 print("✅ Определен адрес: \(self?.city ?? "не найден"), \(self?.street ?? "не найден"), \(self?.house ?? "не найден")")
 
@@ -59,6 +98,8 @@ class LocationManager: ObservableObject {
             }
         }
     }
+
+    // MARK: - Прямое геокодирование (поиск координат по адресу)
 
     func fetchCoordinates(from address: String, completion: @escaping (YMKPoint?) -> Void) {
         let searchOptions = YMKSearchOptions()
@@ -86,4 +127,3 @@ class LocationManager: ObservableObject {
         }
     }
 }
-

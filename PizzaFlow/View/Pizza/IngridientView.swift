@@ -11,15 +11,18 @@ struct IngridientView: View {
     @EnvironmentObject var apiClient: ApiClient
     @State var pizza: Pizza
     @State private var isAddingIngredient = false
+    @Binding var selectedTab: Tab
     @State private var cart: [Pizza] = []
     @State private var selectedIngredients: [Ingredient]
     @EnvironmentObject var cartManager: CartManager
     @State private var isAddedToCart: Bool = false
     @State private var quantity: Int = 1
+    @State private var showCheckout = false
     
-    init(pizza: Pizza, selectedIngredients: [Ingredient]) {
+    init(pizza: Pizza, selectedIngredients: [Ingredient], selectedTab: Binding<Tab>) {
         self.pizza = pizza
         _selectedIngredients = State(initialValue: selectedIngredients)
+        _selectedTab = selectedTab
     }
 
     var body: some View {
@@ -36,7 +39,12 @@ struct IngridientView: View {
                     .foregroundColor(Color("Dark"))
                     .padding(.leading, -10)
             }
+            .padding(.horizontal)
             .padding(.top, 16)
+            Spacer(minLength: 20)
+            Text(pizza.description)
+                .foregroundColor(Color("Dark"))
+                .padding(.horizontal)
 
             Button(action: {
                 isAddingIngredient.toggle()
@@ -70,19 +78,7 @@ struct IngridientView: View {
             Spacer()
 
             HStack(spacing: 10) {
-                Button(action: {
-                    //
-                }) {
-                    Text("Купить")
-                        .font(.system(size: 18, weight: .bold))
-                        .frame(maxWidth: .infinity, minHeight: 30)
-                        .padding()
-                        .background(Color("Greenn"))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 3)
-                }
-
+                
                 if isAddedToCart {
                     HStack {
                         Button(action: {
@@ -151,7 +147,7 @@ struct IngridientView: View {
     private func calculateTotalPrice() -> Double {
         let price = pizza.price
         let extraIngredientsPrice = selectedIngredients
-            .filter { ingredient in !pizza.ingredients.contains(where: { $0.id == ingredient.id }) }
+            .filter { ingredient in !(pizza.ingredients?.contains(where: { $0.id == ingredient.id }) ?? false) }
             .reduce(0) { $0 + $1.price }
         return price + extraIngredientsPrice
     }

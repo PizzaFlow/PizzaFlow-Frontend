@@ -7,20 +7,16 @@
 
 import Foundation
 
-struct Address: Identifiable, Codable {
+struct Address: Codable, Identifiable {
     let id: Int
     let city: String
     let street: String
     let house: String
     let apartment: String
     let user_id: Int
-
+    
     enum CodingKeys: String, CodingKey {
-        case id
-        case city
-        case street
-        case house
-        case apartment
+        case id, city, street, house, apartment
         case user_id = "user_id"
     }
 }

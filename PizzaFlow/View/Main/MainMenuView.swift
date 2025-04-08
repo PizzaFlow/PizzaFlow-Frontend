@@ -51,7 +51,7 @@ struct MainMenuView: View {
                                 }
                             }
                             .sheet(isPresented: $showAddressSheet) { 
-                                AddressListSheet(apiClient: apiClient)
+                                AddressListSheet(apiClient: apiClient, selectedTab: $selectedTab)
                             }
                         }
                         Spacer()
@@ -62,7 +62,7 @@ struct MainMenuView: View {
                     ScrollView {
                         LazyVGrid(columns: calumns, spacing: 20) {
                             ForEach(apiClient.pizzas, id: \.id) { pizza in
-                                PizzaCardView(pizza: pizza)
+                                PizzaCardView(pizza: pizza, selectedTab: $selectedTab)
                                     .environmentObject(apiClient)
                             }
                         }
@@ -98,6 +98,7 @@ struct PizzaCardView: View {
     let pizza: Pizza
     @State private var isIngridientPresented = false
     @State private var selectedIngredients: [Ingredient] = []
+    @Binding var selectedTab: Tab
     var isFavorite: Bool {
         apiClient.favoritePizzas.contains(where: { $0.id == pizza.id })
     }
@@ -152,7 +153,6 @@ struct PizzaCardView: View {
                             .foregroundColor(isFavorite ? .red : Color("Dark"))
                             .padding(.leading, 8)
                     }
-                    // Spacer()
                     
                     Button(action:{
                         isIngridientPresented.toggle()
@@ -168,8 +168,8 @@ struct PizzaCardView: View {
                         .background(Color("Orange"))
                         .cornerRadius(15)
                     }
-                    .sheet(isPresented: $isIngridientPresented){
-                        IngridientView(pizza: pizza, selectedIngredients: pizza.ingredients)
+                    .sheet(isPresented: $isIngridientPresented) {
+                        IngridientView(pizza: pizza, selectedIngredients: pizza.ingredients ?? [], selectedTab: $selectedTab)
                     }
                 }
                 .padding(.bottom, 40)

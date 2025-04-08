@@ -12,10 +12,12 @@ struct FavoritePizzaCardView: View {
     let pizza: Pizza
     @State private var isFavorite: Bool
     @State private var isIngridientPresented = false
+    @Binding var selectedTab: Tab
     
-    init(pizza: Pizza) {
+    init(pizza: Pizza, selectedTab: Binding<Tab>) {
         self.pizza = pizza
         self._isFavorite = State(initialValue: true)
+        _selectedTab = selectedTab
     }
     
     var body: some View {
@@ -63,8 +65,7 @@ struct FavoritePizzaCardView: View {
                             .foregroundColor(isFavorite ? .red : Color("Dark"))
                             .padding(.leading, 8)
                     }
-                    
-                    //Spacer()
+
                     
                     Button(action: {
                         isIngridientPresented.toggle()
@@ -81,7 +82,7 @@ struct FavoritePizzaCardView: View {
                         .cornerRadius(15)
                     }
                     .sheet(isPresented: $isIngridientPresented) {
-                        IngridientView(pizza: pizza, selectedIngredients: pizza.ingredients)
+                        IngridientView(pizza: pizza, selectedIngredients: pizza.ingredients ?? [], selectedTab: $selectedTab)
                     }
                 }
                 .padding(.bottom, 40)

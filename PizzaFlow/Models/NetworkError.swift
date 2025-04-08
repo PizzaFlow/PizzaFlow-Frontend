@@ -17,4 +17,5 @@ enum NetworkError: Error {
     case validationFailed(errors: [String: [String]])
     case nothingToUpdate
     case encodingFailed
+    case addressNotFound
 }

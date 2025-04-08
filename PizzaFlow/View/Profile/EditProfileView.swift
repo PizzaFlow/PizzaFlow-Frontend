@@ -100,7 +100,6 @@ struct EditProfileView: View {
                         phoneNumber = "+7" + (filtered.count > 1 ? String(filtered.dropFirst()) : "")
                         formattedPhoneNumber = formatPhoneNumber(phoneNumber)
                     } else {
-                        // Если введено больше 11 цифр, оставляем предыдущее значение
                         formattedPhoneNumber = formatPhoneNumber(phoneNumber)
                     }
                 }
@@ -199,8 +198,8 @@ struct EditProfileView: View {
     private func loadUserData() {
         Task {
             if let user = await apiClient.currentUser {
-                username = user.username.isEmpty ? "" : user.username
-                phoneNumber = user.phone_number.isEmpty ? "" : user.phone_number
+                username = user.username?.isEmpty ?? true ? "" : user.username ?? ""
+                phoneNumber = user.phone_number?.isEmpty ?? true ? "" : user.phone_number ?? ""
                 formattedPhoneNumber = formatPhoneNumber(phoneNumber)
             }
         }
@@ -209,8 +208,8 @@ struct EditProfileView: View {
     private func checkForChanges() {
         Task {
             if let user = await apiClient.currentUser {
-                let phoneChanged = !phoneNumber.isEmpty && phoneNumber != user.phone_number
-                let usernameChanged = !username.isEmpty && username != user.username
+                let phoneChanged = !phoneNumber.isEmpty && phoneNumber != (user.phone_number ?? "")
+                let usernameChanged = !username.isEmpty && username != (user.username ?? "")
                 let passwordChanged = !newPassword.isEmpty
                 
                 hasChanges = usernameChanged || phoneChanged || passwordChanged
@@ -224,15 +223,13 @@ struct EditProfileView: View {
             errorMessage = nil
             
             do {
-                // 1. Отправляем изменения на сервер
                 let updatedUser = try await apiClient.updateUserProfile(
                     username: username,
                     phoneNumber: phoneNumber,
                     currentPassword: currentPassword.isEmpty ? nil : currentPassword,
                     newPassword: newPassword.isEmpty ? nil : newPassword
                 )
-                
-                // 2. Получаем обновленные данные с сервера
+
                 try await withCheckedThrowingContinuation { continuation in
                     apiClient.fetchCurrentUser(completion: { result in
                         switch result {
@@ -244,7 +241,6 @@ struct EditProfileView: View {
                     })
                 }
                 
-                // 3. Обновляем UI
                 await MainActor.run {
                     showSuccessAlert = true
                     onSave()
@@ -270,6 +266,8 @@ struct EditProfileView: View {
                 return "Требуется авторизация"
             case .invalidResponse:
                 return "Что то там"
+            @unknown default:
+                return "Неизвестная ошибка"
             }
         } else if let error = error as? ValidationError {
             switch error {
@@ -277,6 +275,9 @@ struct EditProfileView: View {
                 return "Номер должен быть в формате +7XXXXXXXXXX"
             case .passwordTooShort:
                 return "Пароль должен содержать минимум 5 символов"
+            @unknown default:
+                return "Неизвестная ошибка"
+            
             }
         } else if let error = error as? NetworkError {
             switch error {

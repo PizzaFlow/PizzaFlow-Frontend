@@ -49,7 +49,6 @@
 		B6A1FDE22D8F649800FF699F /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A1FDE12D8F649800FF699F /* LocationManager.swift */; };
 		B6A1FDE42D8F681500FF699F /* AdressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A1FDE32D8F681500FF699F /* AdressModel.swift */; };
 		B6A1FDEB2D8F694700FF699F /* AdressListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A1FDE92D8F694700FF699F /* AdressListSheet.swift */; };
-		B6A1FDEC2D8F694700FF699F /* CityPickerWithSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A1FDEA2D8F694700FF699F /* CityPickerWithSearchView.swift */; };
 		B6A1FDEE2D96AB3900FF699F /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A1FDED2D96AB3900FF699F /* NetworkError.swift */; };
 		B6B67B842D7D951200B7FD94 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6B67B832D7D951200B7FD94 /* CartManager.swift */; };
 		B6B67B862D7D977000B7FD94 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6B67B852D7D977000B7FD94 /* CartItem.swift */; };
@@ -103,7 +102,6 @@
 		B6A1FDE12D8F649800FF699F /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		B6A1FDE32D8F681500FF699F /* AdressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdressModel.swift; sourceTree = "<group>"; };
 		B6A1FDE92D8F694700FF699F /* AdressListSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdressListSheet.swift; sourceTree = "<group>"; };
-		B6A1FDEA2D8F694700FF699F /* CityPickerWithSearchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CityPickerWithSearchView.swift; sourceTree = "<group>"; };
 		B6A1FDED2D96AB3900FF699F /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		B6B67B832D7D951200B7FD94 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
 		B6B67B852D7D977000B7FD94 /* CartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartItem.swift; sourceTree = "<group>"; };
@@ -242,7 +240,6 @@
 			children = (
 				B6013FEC2D74FC69007563C6 /* YandexMapView.swift */,
 				B6A1FDE92D8F694700FF699F /* AdressListSheet.swift */,
-				B6A1FDEA2D8F694700FF699F /* CityPickerWithSearchView.swift */,
 				B6013FEE2D74FC97007563C6 /* MapScreen.swift */,
 			);
 			path = Map;
@@ -421,7 +418,6 @@
 				B6013FF32D751371007563C6 /* LikemenuView.swift in Sources */,
 				B6B67B842D7D951200B7FD94 /* CartManager.swift in Sources */,
 				B68F6FCD2D74715B00F8E5B4 /* AppDelegate.swift in Sources */,
-				B6A1FDEC2D8F694700FF699F /* CityPickerWithSearchView.swift in Sources */,
 				B663E05D2D7355D6008129DA /* ContentView.swift in Sources */,
 				B67023FF2DA337E6007ED5E6 /* OrderSuccesView.swift in Sources */,
 				B663E0692D7356FE008129DA /* LoginView.swift in Sources */,

@@ -18,11 +18,12 @@ struct IngridientView: View {
     @State private var isAddedToCart: Bool = false
     @State private var quantity: Int = 1
     @State private var showCheckout = false
+    @Environment(\.dismiss) private var dismiss
     
     init(pizza: Pizza, selectedIngredients: [Ingredient], selectedTab: Binding<Tab>) {
-        self.pizza = pizza
-        _selectedIngredients = State(initialValue: selectedIngredients)
-        _selectedTab = selectedTab
+        self._pizza = State(initialValue: pizza)
+        self._selectedIngredients = State(initialValue: selectedIngredients)
+        self._selectedTab = selectedTab
     }
 
     var body: some View {
@@ -119,6 +120,8 @@ struct IngridientView: View {
                     Button(action: {
                         cartManager.addToCart(pizza, ingredients: selectedIngredients)
                         isAddedToCart = true
+                        dismiss()
+                        selectedTab = .cart
                     }) {
                         Text("В корзину")
                             .font(.system(size: 18, weight: .bold))

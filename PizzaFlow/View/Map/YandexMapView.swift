@@ -26,14 +26,20 @@ struct YandexMapView: UIViewRepresentable {
         )
 
         cameraPosition = initialCameraPosition
-
         mapView.mapWindow.map.addCameraListener(with: context.coordinator)
         
         return mapView
     }
 
     func updateUIView(_ uiView: YMKMapView, context: Context) {
-        if let cameraPosition = cameraPosition {
+        guard let cameraPosition = cameraPosition else { return }
+        let currentPosition = uiView.mapWindow.map.cameraPosition
+        let isSamePosition = abs(currentPosition.target.latitude - cameraPosition.target.latitude) < 0.0001 &&
+                            abs(currentPosition.target.longitude - cameraPosition.target.longitude) < 0.0001 &&
+                            abs(currentPosition.zoom - cameraPosition.zoom) < 0.1
+        
+        if !isSamePosition {
+            print("📍 updateUIView: Перемещение карты в \(cameraPosition.target.latitude), \(cameraPosition.target.longitude)")
             uiView.mapWindow.map.move(
                 with: cameraPosition,
                 animation: YMKAnimation(type: .smooth, duration: 1),
@@ -75,6 +81,7 @@ struct YandexMapView: UIViewRepresentable {
 
             lastUpdateTime = now
             lastPosition = cameraPosition.target
+            parent.cameraPosition = cameraPosition // Синхронизируем cameraPosition
             
             print("📍 Обновление: \(cameraPosition.target.latitude), \(cameraPosition.target.longitude)")
             parent.locationManager.fetchAddress(from: cameraPosition.target) { [weak self] success in

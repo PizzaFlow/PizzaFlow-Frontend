@@ -20,9 +20,10 @@ struct MapScreen: View {
     @State private var lastUpdateTime = Date()
     @State private var lastPosition: YMKPoint?
     @State private var isCameraMoving = false
-    @State private var selectedCity: String = ""
     @State private var tempAddressInput: String = ""
     @State private var keyboardHeight: CGFloat = 0
+    @State private var isKeyboardVisible = false
+    @State private var hasInitializedCamera = false
 
     let minHeight: CGFloat = 400
     let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.9
@@ -30,6 +31,8 @@ struct MapScreen: View {
 
     init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
+        let initialPoint = YMKPoint(latitude: 55.7558, longitude: 37.6173)
+        self._cameraPosition = State(initialValue: YMKCameraPosition(target: initialPoint, zoom: 12, azimuth: 0, tilt: 0))
     }
 
     var body: some View {
@@ -43,39 +46,44 @@ struct MapScreen: View {
                 .scaledToFit()
                 .frame(width: 40, height: 40)
                 .foregroundColor(Color("Orange"))
-                .position(x: UIScreen.main.bounds.width / 2, y: (UIScreen.main.bounds.height - minHeight) / 2) // Фиксируем в центре карты
-
+                .position(x: UIScreen.main.bounds.width / 2, y: (UIScreen.main.bounds.height - minHeight) / 2)
 
             addressSheet
         }
         .edgesIgnoringSafeArea(.all)
-        .onChange(of: cameraPosition) { oldValue, newValue in
-            guard let newTarget = newValue?.target else { return }
-
-            let now = Date()
-            if now.timeIntervalSince(lastUpdateTime) > 30.0 {
-                lastUpdateTime = now
-                locationManager.fetchAddress(from: newTarget) { success in
-                    if success {
-                        DispatchQueue.main.async {
-                            addressInput = "\(locationManager.street), \(locationManager.house)"
-                        }
-                    }
-                }
+        .onReceive(locationManager.$city.combineLatest(locationManager.$street, locationManager.$house)) { city, street, house in
+            let newAddress = "\(city), \(street)\(house.isEmpty ? "" : ", \(house)")"
+            addressInput = newAddress
+            tempAddressInput = newAddress
+            print("🔄 Обновление TextField через onReceive: \(newAddress)")
+        }
+        .onReceive(locationManager.$currentLocation) { newLocation in
+            guard let location = newLocation else { return }
+            if !hasInitializedCamera {
+                print("📍 Обновление геолокации: \(location.latitude), \(location.longitude)")
+                cameraPosition = YMKCameraPosition(target: location, zoom: 16, azimuth: 0, tilt: 0)
+                hasInitializedCamera = true
             }
         }
-        .onChange(of: addressInput) { newValue in
-            tempAddressInput = newValue
-        }
         .onAppear {
+            print("📍 Вызван onAppear, hasInitializedCamera: \(hasInitializedCamera)")
+            // Настройка уведомлений клавиатуры
             NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
                 if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                    keyboardHeight = keyboardFrame.height
+                    DispatchQueue.main.async {
+                        keyboardHeight = keyboardFrame.height
+                        isKeyboardVisible = true
+                        print("⌨️ Клавиатура показана, isKeyboardVisible: \(isKeyboardVisible)")
+                    }
                 }
             }
 
             NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
-                keyboardHeight = 0
+                DispatchQueue.main.async {
+                    keyboardHeight = 0
+                    isKeyboardVisible = false
+                    print("⌨️ Клавиатура скрыта, isKeyboardVisible: \(isKeyboardVisible)")
+                }
             }
         }
     }
@@ -87,14 +95,31 @@ struct MapScreen: View {
                 .frame(width: 50, height: 5)
                 .padding(.top, 12)
 
-            Text("Адрес доставки")
-                .font(.title3.bold())
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                Text("Адрес доставки")
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+
+                Button(action: {
+                    hideKeyboard()
+                    isKeyboardVisible = false
+                }) {
+                    Image(systemName: "keyboard")
+                        .foregroundColor(Color("Orange"))
+                        .padding()
+                        .background(Color("Dark"))
+                        .clipShape(Circle())
+                }
+                .opacity(isKeyboardVisible ? 1 : 0)
                 .padding(.horizontal)
+            }
+
+            
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Улица и дом")
+                Text("Адрес (город, улица, дом)")
                     .font(.footnote)
                     .foregroundColor(.gray)
 
@@ -110,14 +135,19 @@ struct MapScreen: View {
                                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                         )
                         .onChange(of: tempAddressInput) { newValue in
-                            locationManager.street = newValue
-                            locationManager.house = ""
+                            let components = newValue.components(separatedBy: ", ")
+                            locationManager.city = components.first ?? ""
+                            locationManager.street = components.count > 1 ? components[1] : ""
+                            locationManager.house = components.count > 2 ? components[2] : ""
                             addressInput = newValue
+                        }
+                        .onTapGesture {
+                            print("🖱️ TextField получил фокус")
                         }
 
                     Button(action: {
-                        guard !addressInput.isEmpty else { return }
-                        locationManager.fetchCoordinates(from: addressInput) { point in
+                        guard !tempAddressInput.isEmpty else { return }
+                        locationManager.fetchCoordinates(from: tempAddressInput) { point in
                             if let newPoint = point {
                                 cameraPosition = YMKCameraPosition(target: newPoint, zoom: 16, azimuth: 0, tilt: 0)
                             }
@@ -135,31 +165,19 @@ struct MapScreen: View {
             }
             .padding(.horizontal)
 
-            HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Город:")
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                    CityPickerWithSearchView(selectedCity: $selectedCity)
-                        .frame(height: 44)
-                }
-                .frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Квартира")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
 
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Квартира")
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-
-                    TextField("Введите номер квартиры", text: $locationManager.apartment)
-                        .padding()
-                        .frame(height: 44)
-                        .keyboardType(.numberPad)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white)
-                        )
-                }
-                .frame(maxWidth: .infinity)
+                TextField("Введите номер квартиры", text: $locationManager.apartment)
+                    .padding()
+                    .frame(height: 44)
+                    .keyboardType(.numberPad)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white)
+                    )
             }
             .padding(.horizontal)
 
@@ -169,15 +187,9 @@ struct MapScreen: View {
                     return
                 }
 
-                let city = selectedCity.isEmpty ? locationManager.city : selectedCity
-                let fullAddress = locationManager.street
-
-                let addressComponents = fullAddress.components(separatedBy: ", ")
-                let street = addressComponents.first ?? ""
-                let house = addressComponents.count > 1 ? addressComponents[1] : ""
-
-                locationManager.street = street
-                locationManager.house = house
+                let city = locationManager.city
+                let street = locationManager.street
+                let house = locationManager.house
                 let apartment = locationManager.apartment
 
                 apiClient.addAddress(

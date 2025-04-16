@@ -160,11 +160,14 @@ struct PizzaCardView: View {
                         HStack{
                             Image(systemName: "plus")
                             Text("Добавить")
-                                .font(.system(size: 15))
+                                .font(.system(size: 14))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         }
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 20)
                         .padding(.vertical, 8)
+                        .frame(minWidth: 100)
                         .background(Color("Orange"))
                         .cornerRadius(15)
                     }
@@ -176,6 +179,7 @@ struct PizzaCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.white)
+            //.frame(minWidth: 120)
             .padding([.leading, .trailing], 12)
         }
         .background(Color.white)
